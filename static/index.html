@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>D100 Card Printer</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<header>
+  <h1>D100 Card Printer</h1>
+  <p class="subtitle">Impagina PDF/immagini su etichette e stampa via Bluetooth sulla stampante termica D100.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>1. Pagina / etichetta</h2>
+    <div class="row">
+      <label>Preset
+        <select id="page-preset">
+          <option value="100x150">Etichetta 100x150mm</option>
+          <option value="a4">Foglio A4 (210x297mm)</option>
+          <option value="roll100">Rullo continuo, largo 100mm</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <label>Larghezza (mm) <input id="page-w" type="number" step="0.1" value="100" /></label>
+      <label>Altezza (mm) <input id="page-h" type="number" step="0.1" value="150" /></label>
+      <label>Modalità
+        <select id="page-mode">
+          <option value="sheet">Foglio/etichetta fissa</option>
+          <option value="roll">Rullo continuo</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Dimensione carta</h2>
+    <div class="row">
+      <label>Larghezza (mm) <input id="card-w" type="number" step="0.1" value="63" /></label>
+      <label>Altezza (mm) <input id="card-h" type="number" step="0.1" value="88" /></label>
+      <label>Margine pagina (mm) <input id="margin" type="number" step="0.1" value="2" /></label>
+      <label>Spazio tra carte (mm) <input id="gutter" type="number" step="0.1" value="2" /></label>
+      <label class="checkbox"><input id="allow-rotation" type="checkbox" checked /> Consenti rotazione 90° per ottimizzare</label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. File da stampare</h2>
+    <div id="dropzone" class="dropzone">
+      Trascina qui PDF o immagini, oppure
+      <label class="filepicker">scegli file<input id="file-input" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.bmp,.webp" /></label>
+    </div>
+    <table id="items-table" class="items-table" hidden>
+      <thead><tr><th>File</th><th>Tipo</th><th>Pagine</th><th>Dimensione rilevata</th><th>Copie</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>4. Layout</h2>
+    <button id="btn-preview" class="primary">Genera anteprima</button>
+    <div id="layout-stats" class="stats"></div>
+    <div id="previews" class="previews"></div>
+    <a id="download-link" hidden href="#" target="_blank">Scarica PDF pronto per la stampa</a>
+  </section>
+
+  <section class="card">
+    <h2>5. Stampante</h2>
+    <details>
+      <summary>Configurazione stampante D100 (Bluetooth via TiMini-Print CLI)</summary>
+      <div class="row">
+        <label>Percorso CLI TiMini-Print <input id="cfg-cli" type="text" placeholder="/path/to/timiniprint_command_line.py" /></label>
+        <label>Nome/indirizzo BT stampante <input id="cfg-name" type="text" placeholder="D100-XXXX oppure AA:BB:CC:DD:EE:FF" /></label>
+        <label>Modello profilo <input id="cfg-model" type="text" value="d100" /></label>
+      </div>
+      <button id="btn-save-config">Salva configurazione</button>
+      <span id="config-status"></span>
+    </details>
+    <button id="btn-print" class="primary" disabled>Stampa via Bluetooth</button>
+    <div id="print-status"></div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
