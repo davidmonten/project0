@@ -30,6 +30,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/files", StaticFiles(directory=JOBS_DIR), name="files")
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".webp", ".tif", ".tiff"}
+VECTOR_EXTS = {".svg"}
 
 
 class Job:
@@ -71,13 +72,25 @@ async def upload_items(job_id: str, files: list[UploadFile] = File(...)):
     job = _get_job(job_id)
     for upload in files:
         ext = Path(upload.filename).suffix.lower()
-        kind = "pdf" if ext == ".pdf" else "image" if ext in IMAGE_EXTS else None
-        if kind is None:
+        if ext == ".pdf":
+            kind = "pdf"
+        elif ext in IMAGE_EXTS:
+            kind = "image"
+        elif ext in VECTOR_EXTS:
+            kind = "pdf"  # SVGs are converted to a 1-page PDF on upload, see below
+        else:
             raise HTTPException(400, f"Formato non supportato: {upload.filename}")
         item_id = uuid.uuid4().hex[:8]
-        dest = job.sources_dir / f"{item_id}{ext}"
         content = await upload.read()
-        dest.write_bytes(content)
+        if ext in VECTOR_EXTS:
+            tmp_svg = job.sources_dir / f"{item_id}_src.svg"
+            tmp_svg.write_bytes(content)
+            dest = job.sources_dir / f"{item_id}.pdf"
+            pdfgen.convert_svg_to_pdf(tmp_svg, dest)
+            tmp_svg.unlink()
+        else:
+            dest = job.sources_dir / f"{item_id}{ext}"
+            dest.write_bytes(content)
         page_count, w_mm, h_mm = pdfgen.inspect_source(dest, kind)
         item = SourceItem(
             id=item_id,

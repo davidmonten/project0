@@ -21,6 +21,22 @@ def mm_to_pt(mm: float) -> float:
     return mm * MM_TO_PT
 
 
+def convert_svg_to_pdf(svg_path: Path, out_pdf_path: Path) -> Path:
+    """Convert a single SVG file into a 1-page PDF.
+
+    MuPDF (via PyMuPDF) opens SVG directly as a document, so we just
+    re-save it as PDF and treat it exactly like any other PDF source
+    from then on. Note: the resulting page size mirrors the SVG's
+    width/height attributes; if the SVG declares them in plain numbers
+    (no "mm"/"in" units) MuPDF treats them as points, not millimeters,
+    so the auto-detected card size may need a manual check/override.
+    """
+    with fitz.open(svg_path) as src:
+        pdf_bytes = src.convert_to_pdf()
+    out_pdf_path.write_bytes(pdf_bytes)
+    return out_pdf_path
+
+
 def inspect_source(path: Path, kind: str) -> tuple[int, float | None, float | None]:
     """Return (page_count, width_mm, height_mm) for a source file.
 
